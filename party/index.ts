@@ -1,5 +1,11 @@
 import type * as Party from "partykit/server";
-import { Action, GameState, ServerAction } from "../game/logic";
+import {
+  Action,
+  balanceTeamByMMR,
+  GameState,
+  initGameState,
+  ServerAction,
+} from "../game/logic";
 
 export default class Server implements Party.Server {
   constructor(readonly room: Party.Room) {}
@@ -16,18 +22,13 @@ export default class Server implements Party.Server {
     );
 
     if (!this.game) {
-      this.game = {
-        users: [],
-        ready: [],
-        teamBlue: [],
-        teamRed: [],
-        // board: [],
-        // currentPlayer: 0,
-        // winner: null,
-      };
+      this.game = initGameState(conn.id);
     }
 
-    this.game.users.push({ id: conn.id });
+    this.game.users.push({
+      id: conn.id,
+      mmr: Math.floor(Math.random() * (1000 - 400) + 400),
+    });
 
     // let's send a message to the connection
     conn.send(JSON.stringify(this.game));
@@ -56,7 +57,10 @@ export default class Server implements Party.Server {
   onMessage(message: string, sender: Party.Connection) {
     const action: ServerAction = {
       ...(JSON.parse(message) as Action),
-      user: { id: sender.id },
+      user: {
+        id: sender.id,
+        mmr: Math.floor(Math.random() * (1000 - 400) + 400),
+      },
     };
 
     console.log(`connection ${sender.id} sent action: ${action}`);
@@ -95,8 +99,14 @@ export default class Server implements Party.Server {
       }
     }
 
+    if (action.type === "balance-teams") {
+      balanceTeamByMMR(this.game);
+    }
+
     const everyoneReady = this.game.ready.length === this.game.users.length;
-    console.log("Iniciar jogo...", everyoneReady);
+    if (everyoneReady) {
+      console.log("Iniciar jogo...");
+    }
 
     // as well as broadcast it to all the other connections in the room...
     this.room.broadcast(JSON.stringify(this.game));

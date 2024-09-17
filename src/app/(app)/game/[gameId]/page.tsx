@@ -19,6 +19,7 @@ export default function GamePage({ params: { gameId } }: GamePageProps) {
   const { gameState, dispatch } = useGameRoom(username, params.gameId);
 
   const amIReady = gameState?.ready.some((userId) => userId === username);
+  const isOwner = gameState?.ownerId === username;
 
   function copyInviteLinkToClipboard() {
     const { origin } = window.location;
@@ -47,7 +48,12 @@ export default function GamePage({ params: { gameId } }: GamePageProps) {
 
             return (
               <li key={user.id}>
-                <span className="font-medium mr-2">{user.id}</span>
+                <span className="font-medium mr-2">
+                  {user.id} - {user.mmr} Pontos
+                </span>
+
+                {isOwner && <span>Dono </span>}
+
                 {isUserReady ? <span>Pronto</span> : <span>Esperando...</span>}
               </li>
             );
@@ -71,6 +77,14 @@ export default function GamePage({ params: { gameId } }: GamePageProps) {
       </div>
 
       <div className="grid grid-cols-2 pt-12">
+        <div className="col-span-full pb-4">
+          {isOwner && (
+            <Button onClick={() => dispatch({ type: "balance-teams" })}>
+              Balancear Times
+            </Button>
+          )}
+        </div>
+
         <div>
           <h2>Time Azul</h2>
 
