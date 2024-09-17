@@ -2,7 +2,7 @@ import usePartySocket from "partysocket/react";
 import { useState } from "react";
 import { Action, GameState } from "../../game/logic";
 
-export function useGameRoom(username: string, roomId: string) {
+export function useGameRoom(username: string, roomId: string, roles: string) {
   const [gameState, setGameState] = useState<GameState | null>(null);
 
   const socket = usePartySocket({
@@ -10,12 +10,18 @@ export function useGameRoom(username: string, roomId: string) {
     room: roomId,
     id: username,
 
+    query() {
+      return {
+        roles,
+      };
+    },
+
     onOpen() {
       console.log("Socket connected");
     },
 
     onMessage(event: MessageEvent<string>) {
-      console.log("onMessage", event.data);
+      // console.log("onMessage", event.data);
 
       setGameState(JSON.parse(event.data));
     },

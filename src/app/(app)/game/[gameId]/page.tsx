@@ -15,11 +15,11 @@ export default function GamePage({ params: { gameId } }: GamePageProps) {
   const searchParams = useSearchParams();
 
   const username = searchParams.get("username")!;
+  const roles = searchParams.get("roles")!;
 
-  const { gameState, dispatch } = useGameRoom(username, params.gameId);
+  const { gameState, dispatch } = useGameRoom(username, params.gameId, roles);
 
   const amIReady = gameState?.ready.some((userId) => userId === username);
-  const isOwner = gameState?.ownerId === username;
 
   function copyInviteLinkToClipboard() {
     const { origin } = window.location;
@@ -52,9 +52,10 @@ export default function GamePage({ params: { gameId } }: GamePageProps) {
                   {user.id} - {user.mmr} Pontos
                 </span>
 
-                {isOwner && <span>Dono </span>}
+                {gameState?.ownerId === user.id && <span>Dono </span>}
 
                 {isUserReady ? <span>Pronto</span> : <span>Esperando...</span>}
+                <div>Roles: {user.preferredRole}</div>
               </li>
             );
           })}
@@ -78,7 +79,7 @@ export default function GamePage({ params: { gameId } }: GamePageProps) {
 
       <div className="grid grid-cols-2 pt-12">
         <div className="col-span-full pb-4">
-          {isOwner && (
+          {gameState?.ownerId === username && (
             <Button onClick={() => dispatch({ type: "balance-teams" })}>
               Balancear Times
             </Button>
@@ -86,25 +87,15 @@ export default function GamePage({ params: { gameId } }: GamePageProps) {
         </div>
 
         <div>
-          <h2>Time Azul</h2>
+          <h2 className="text-lg font-semibold text-blue-400">Time Azul</h2>
 
           <ul>
-            {gameState?.teamBlue.map((user) => {
-              const isUserReady = gameState.ready.some(
-                (userId) => userId === user.id,
-              );
-
-              return (
-                <li key={user.id}>
-                  <span className="font-medium mr-2">{user.id}</span>
-                  {isUserReady ? (
-                    <span>Pronto</span>
-                  ) : (
-                    <span>Esperando...</span>
-                  )}
-                </li>
-              );
-            })}
+            {gameState?.teamBlue.map((user) => (
+              <li key={user.id}>
+                <span className="font-medium mr-2">{user.id}</span>
+                <span>{user.role} </span>
+              </li>
+            ))}
           </ul>
 
           <Button
@@ -115,25 +106,15 @@ export default function GamePage({ params: { gameId } }: GamePageProps) {
         </div>
 
         <div>
-          <h2>Time Vermelho</h2>
+          <h2 className="text-lg font-semibold text-red-400">Time Vermelho</h2>
 
           <ul>
-            {gameState?.teamRed.map((user) => {
-              const isUserReady = gameState.ready.some(
-                (userId) => userId === user.id,
-              );
-
-              return (
-                <li key={user.id}>
-                  <span className="font-medium mr-2">{user.id}</span>
-                  {isUserReady ? (
-                    <span>Pronto</span>
-                  ) : (
-                    <span>Esperando...</span>
-                  )}
-                </li>
-              );
-            })}
+            {gameState?.teamRed.map((user) => (
+              <li key={user.id}>
+                <span className="font-medium mr-2">{user.id}</span>
+                <span>{user.role} </span>
+              </li>
+            ))}
           </ul>
 
           <Button

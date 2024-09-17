@@ -4,6 +4,7 @@ import {
   balanceTeamByMMR,
   GameState,
   initGameState,
+  Role,
   ServerAction,
 } from "../game/logic";
 
@@ -11,6 +12,15 @@ export default class Server implements Party.Server {
   constructor(readonly room: Party.Room) {}
 
   game: GameState | undefined;
+
+  static async onBeforeConnect(request: Party.Request, lobby: Party.Lobby) {
+    // get token from request query string
+    const roles = new URL(request.url).searchParams.get("roles") ?? "";
+    request.headers.set("roles", roles);
+
+    // forward the request onwards on onConnect
+    return request;
+  }
 
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
     // A websocket just connected!
@@ -25,9 +35,11 @@ export default class Server implements Party.Server {
       this.game = initGameState(conn.id);
     }
 
+    const roles = ctx.request.headers.get("roles");
     this.game.users.push({
       id: conn.id,
       mmr: Math.floor(Math.random() * (1000 - 400) + 400),
+      preferredRole: roles?.split(",") as Role[],
     });
 
     // let's send a message to the connection
