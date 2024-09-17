@@ -69,6 +69,66 @@ export default function GamePage({ params: { gameId } }: GamePageProps) {
           {amIReady ? "Cancelar" : "Pronto"}
         </Button>
       </div>
+
+      <div className="grid grid-cols-2 pt-12">
+        <div>
+          <h2>Time Azul</h2>
+
+          <ul>
+            {gameState?.teamBlue.map((user) => {
+              const isUserReady = gameState.ready.some(
+                (userId) => userId === user.id,
+              );
+
+              return (
+                <li key={user.id}>
+                  <span className="font-medium mr-2">{user.id}</span>
+                  {isUserReady ? (
+                    <span>Pronto</span>
+                  ) : (
+                    <span>Esperando...</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+
+          <Button
+            onClick={() => dispatch({ type: "join-team", payload: "teamBlue" })}
+          >
+            Entrar
+          </Button>
+        </div>
+
+        <div>
+          <h2>Time Vermelho</h2>
+
+          <ul>
+            {gameState?.teamRed.map((user) => {
+              const isUserReady = gameState.ready.some(
+                (userId) => userId === user.id,
+              );
+
+              return (
+                <li key={user.id}>
+                  <span className="font-medium mr-2">{user.id}</span>
+                  {isUserReady ? (
+                    <span>Pronto</span>
+                  ) : (
+                    <span>Esperando...</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+
+          <Button
+            onClick={() => dispatch({ type: "join-team", payload: "teamRed" })}
+          >
+            Entrar
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

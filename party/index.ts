@@ -19,6 +19,8 @@ export default class Server implements Party.Server {
       this.game = {
         users: [],
         ready: [],
+        teamBlue: [],
+        teamRed: [],
         // board: [],
         // currentPlayer: 0,
         // winner: null,
@@ -76,6 +78,25 @@ export default class Server implements Party.Server {
         (userId) => userId !== action.user.id,
       );
     }
+
+    if (action.type === "join-team") {
+      const userAlreadyInTeam = this.game[action.payload].some(
+        (user) => user.id === action.user.id,
+      );
+
+      if (!userAlreadyInTeam) {
+        this.game[action.payload].push(action.user);
+
+        // exit the user from the other team
+        const otherTeam = action.payload === "teamRed" ? "teamBlue" : "teamRed";
+        this.game[otherTeam] = this.game[otherTeam].filter(
+          (user) => user.id !== action.user.id,
+        );
+      }
+    }
+
+    const everyoneReady = this.game.ready.length === this.game.users.length;
+    console.log("Iniciar jogo...", everyoneReady);
 
     // as well as broadcast it to all the other connections in the room...
     this.room.broadcast(JSON.stringify(this.game));

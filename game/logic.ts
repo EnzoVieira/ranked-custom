@@ -8,7 +8,9 @@ export type DefaultAction =
   | { type: "user-entered"; state: BaseGameState }
   | { type: "user-exit"; state: BaseGameState };
 
-type GameAction = { type: "ready" };
+type GameAction =
+  | { type: "ready" }
+  | { type: "join-team"; payload: "teamRed" | "teamBlue" };
 
 export type Action = DefaultAction | GameAction;
 
@@ -20,4 +22,6 @@ interface BaseGameState {
 
 export interface GameState extends BaseGameState {
   ready: string[];
+  teamRed: User[];
+  teamBlue: User[];
 }
