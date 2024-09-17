@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useGameRoom } from "@/hooks/use-game-room";
+import { Copy } from "lucide-react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 
@@ -19,9 +20,22 @@ export default function GamePage({ params: { gameId } }: GamePageProps) {
 
   const amIReady = gameState?.ready.some((userId) => userId === username);
 
+  function copyInviteLinkToClipboard() {
+    const { origin } = window.location;
+
+    const inviteLink = `${origin}/game?gameId=${gameId}`;
+
+    navigator.clipboard.writeText(inviteLink);
+  }
+
   return (
     <div className="px-4 pt-12 space-y-6">
-      <h1 className="text-2xl font-bold">Nome da sala: {gameId}</h1>
+      <div className="flex gap-2 items-center">
+        <h1 className="text-2xl font-bold">Nome da sala: {gameId}</h1>
+        <Button size="icon" onClick={copyInviteLinkToClipboard}>
+          <Copy className="size-4" />
+        </Button>
+      </div>
 
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Jogadores</h3>

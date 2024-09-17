@@ -1,5 +1,5 @@
 import type * as Party from "partykit/server";
-import { GameState } from "../game/logic";
+import { Action, GameState, ServerAction } from "../game/logic";
 
 export default class Server implements Party.Server {
   constructor(readonly room: Party.Room) {}
@@ -52,24 +52,28 @@ export default class Server implements Party.Server {
   }
 
   onMessage(message: string, sender: Party.Connection) {
-    // let's log the message
-    console.log(`connection ${sender.id} sent message: ${message}`);
+    const action: ServerAction = {
+      ...(JSON.parse(message) as Action),
+      user: { id: sender.id },
+    };
+
+    console.log(`connection ${sender.id} sent action: ${action}`);
 
     if (!this.game) {
       return;
     }
 
     const userAlreadyReady = this.game.ready.some(
-      (userId) => userId === sender.id,
+      (userId) => userId === action.user.id,
     );
 
-    if (JSON.parse(message).type === "ready" && !userAlreadyReady) {
-      this.game.ready.push(sender.id);
+    if (action.type === "ready" && !userAlreadyReady) {
+      this.game.ready.push(action.user.id);
     }
 
-    if (JSON.parse(message).type === "ready" && userAlreadyReady) {
+    if (action.type === "ready" && userAlreadyReady) {
       this.game.ready = this.game.ready.filter(
-        (userId) => userId !== sender.id,
+        (userId) => userId !== action.user.id,
       );
     }
 
